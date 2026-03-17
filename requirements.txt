@@ -1,3 +1,6 @@
 sentence-transformers
 transformers
 chromadb
+fastapi
+pydantic
+streamlit

@@ -1,7 +1,7 @@
 from pathlib import Path
 from sentence_transformers import SentenceTransformer
 import chromadb
-from config import *
+from src.config import *
 
 
 def load_files(repo_path: str) -> list:

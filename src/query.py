@@ -1,5 +1,5 @@
 import chromadb
-from config import *
+from src.config import *
 from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
@@ -75,17 +75,25 @@ Answer:
     return answer
 
 
-def main():
-    query = "How to run the OpenAI server in vLLM?"
+def rag_pipeline(query: str) -> str:
     collection = get_collection()
     if collection is None:
-        return
+        return None
+
     model = SentenceTransformer(EMBEDDING_MODEL)
     tokenizer, llm = load_llm()
     results = get_results(query, collection, model)
     context = build_context(results)
     answer = generate_answer(query, context, tokenizer, llm)
-    print(answer)
+
+    return answer
+
+
+def main():
+    query = "How to run the OpenAI server in vLLM?"
+    answer = rag_pipeline(query)
+    if answer is not None:
+        print(answer)
 
 
 if __name__ == "__main__":
