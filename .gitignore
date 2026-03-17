@@ -1,2 +1,4 @@
 vllm-0.10.1/
 env/
+__pycache__/
+chroma_db/

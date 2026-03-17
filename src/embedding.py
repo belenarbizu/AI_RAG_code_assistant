@@ -1,6 +1,7 @@
 from pathlib import Path
 from sentence_transformers import SentenceTransformer
 import chromadb
+from config import *
 
 
 def load_files(repo_path: str) -> list:
@@ -33,7 +34,7 @@ def chunk_files(files: list) -> list:
     return chunks
 
 
-def chunk_text(text: str, size=500, overlap=100) -> list:
+def chunk_text(text: str, size: int = 500, overlap: int = 100) -> list:
     chunks = []
 
     for i in range(0, len(text), size - overlap):
@@ -43,7 +44,7 @@ def chunk_text(text: str, size=500, overlap=100) -> list:
 
 
 def create_embeddings(chunks: list) -> list:
-    model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+    model = SentenceTransformer(EMBEDDING_MODEL)
     
     texts = [chunk["text"] for chunk in chunks]
     embeddings = model.encode(texts, show_progress_bar=True)
@@ -52,10 +53,9 @@ def create_embeddings(chunks: list) -> list:
 
 
 def vector_database(embeddings: list, chunks: list):
-    client = chromadb.Client(
-        chromadb.config.Settings(persist_directory="./chroma_db")
-    )
-    collection = client.create_collection(name="vllm_repo")
+    client = chromadb.PersistentClient(path=CHROMA_PATH)
+
+    collection = client.get_or_create_collection(name=COLLECTION_NAME)
     
     documents = [chunk["text"] for chunk in chunks]
     metadatas = [chunk["metadata"] for chunk in chunks]
@@ -70,7 +70,7 @@ def vector_database(embeddings: list, chunks: list):
 
 
 def main():
-    files = load_files("vllm-0.10.1/")
+    files = load_files(DATA_PATH)
     chunks = chunk_files(files)
     embeddings = create_embeddings(chunks)
     vector_database(embeddings, chunks)
