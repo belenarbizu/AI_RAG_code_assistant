@@ -35,10 +35,13 @@ def load_llm() -> tuple:
 
 def build_context(results: list) -> str:
     documents = results["documents"][0]
+    metadatas = results["metadatas"][0]
 
     context = "\n\n".join(documents)
 
-    return context
+    sources = list(set([meta["file_path"] for meta in metadatas]))
+
+    return context, sources
 
 
 def generate_answer(query: str, context: str, tokenizer, llm) -> str:
@@ -48,13 +51,15 @@ You are an expert AI asistant that answers questions about a codebase.
 Use ONLY the context below.
 If the answer is not in the context, say "I don't know".
 
+DO NOT repeat the question. DO NOT generate new questions. DO NOT add explanations outside the answer.
+
 Context:
 {context}
 
 Question:
 {query}
 
-Answer:
+Answer (only the answer, nothing else):
 """
 
     # Convert text to numbers
@@ -70,7 +75,7 @@ Answer:
     # Convert numbers to text
     decoded = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-    answer = decoded.split("Answer:")[-1].strip()
+    answer = decoded.split("Answer (only the answer, nothing else):")[-1].strip()
 
     return answer
 
@@ -83,17 +88,20 @@ def rag_pipeline(query: str) -> str:
     model = SentenceTransformer(EMBEDDING_MODEL)
     tokenizer, llm = load_llm()
     results = get_results(query, collection, model)
-    context = build_context(results)
+    context, sources = build_context(results)
     answer = generate_answer(query, context, tokenizer, llm)
 
-    return answer
+    return { "answer": answer, "sources": sources }
 
 
 def main():
     query = "How to run the OpenAI server in vLLM?"
-    answer = rag_pipeline(query)
+    answer, sources = rag_pipeline(query)
     if answer is not None:
+        print("Answer:")
         print(answer)
+        print("Sources:")
+        print(sources)
 
 
 if __name__ == "__main__":

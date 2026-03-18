@@ -12,5 +12,9 @@ if st.button("Ask"):
         data = response.json()
         st.subheader("Answer:")
         st.write(data["answer"])
+        st.divider()
+        st.write("Sources:")
+        for src in data["sources"]:
+            st.markdown(f"- {src}")
     else:
         st.error("Something went wrong")
