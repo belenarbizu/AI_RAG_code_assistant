@@ -4,3 +4,4 @@ chromadb
 fastapi
 pydantic
 streamlit
+bm25s

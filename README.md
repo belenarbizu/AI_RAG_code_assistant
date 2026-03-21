@@ -10,3 +10,6 @@ Built a RAG pipeline to answer questions about large codebases.
 | Vector DB  | ChromaDB              |
 | Framework  | LangChain             |
 | Dataset    | vLLM repository       |
+
+uvicorn src.api:app --reload
+streamlit run .\src\app.py
