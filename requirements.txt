@@ -6,3 +6,7 @@ pydantic
 streamlit
 bm25s
 langchain
+langchain-community
+unstructured
+langchain-text-splitters
+"unstructured[md]"
