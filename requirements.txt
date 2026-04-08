@@ -10,3 +10,5 @@ langchain-community
 unstructured
 langchain-text-splitters
 "unstructured[md]"
+langchain-huggingface
+langchain-chroma
