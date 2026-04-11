@@ -36,18 +36,26 @@ def build_context(results: list) -> str:
 
 def generate_answer(query, context, tokenizer, llm):
     messages = [
-        {"role": "system", "content": "You are an assistant that answers questions about a code repository. Answer using ONLY the provided context. If unsure, say 'I don't know'."},
+        {
+            "role": "system", 
+            "content": "You are a concise assistant. Answer the question using ONLY the provided context. If the answer is not in the context, say 'I don't know'. Do not include any labels like 'Assistant:' or 'Answer:' in your response."
+        },
         {"role": "user", "content": f"Context:\n{context}\n\nQuestion: {query}"}
     ]
     
     # Aplicar el chat template del modelo
     text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    inputs = tokenizer(text, return_tensors="pt")
+    inputs = tokenizer(text, return_tensors="pt").to(llm.device)
     
-    outputs = llm.generate(**inputs, max_new_tokens=300, temperature=0.1, do_sample=True)
+    outputs = llm.generate(**inputs, max_new_tokens=300, temperature=0.1, do_sample=False)
     decoded = tokenizer.decode(outputs[0][inputs['input_ids'].shape[1]:], skip_special_tokens=True)
     
-    return decoded.strip()
+    # Limpieza de seguridad por si el modelo genera la etiqueta Assistant por inercia
+    response = decoded.strip()
+    if response.lower().startswith("assistant:"):
+        response = response[len("assistant:"):].strip()
+    
+    return response
 
 
 def build_bm25_index(documents: list):

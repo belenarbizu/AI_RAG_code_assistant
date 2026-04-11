@@ -12,3 +12,6 @@ langchain-text-splitters
 "unstructured[md]"
 langchain-huggingface
 langchain-chroma
+accelerate
+langchain_ollama
+python-magic-bin

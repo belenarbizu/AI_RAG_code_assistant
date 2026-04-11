@@ -8,8 +8,11 @@ Built a RAG pipeline to answer questions about large codebases.
 | LLM        | Qwen                  |
 | Embeddings | sentence-transformers |
 | Vector DB  | ChromaDB              |
-| Framework  | LangChain             |
 | Dataset    | vLLM repository       |
 
 uvicorn src.api:app --reload
 streamlit run .\src\app.py
+
+Langchain:
+install ollama
+ollama pull mistral

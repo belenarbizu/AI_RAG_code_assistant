@@ -14,7 +14,11 @@ if st.button("Ask"):
         st.write(data["answer"])
         st.divider()
         st.write("Sources:")
-        for src in data["sources"]:
-            st.markdown(f"- {src}")
+        if data.get("sources"):
+            for src in data.get("sources"):
+                st.markdown(f"- {src}")
+        if data.get("context"):
+            for doc in data.get("context"):
+                st.markdown(f"- {doc.get('metadata', {}).get('source', 'Unknown')}")
     else:
         st.error("Something went wrong")
