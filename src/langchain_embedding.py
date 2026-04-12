@@ -2,7 +2,7 @@ from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter, Language
 from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings
-from config import *
+from src.config import *
 
 
 def load_files(repo_path: str) -> list:
@@ -56,18 +56,15 @@ def chunking_files(md_files: list, py_files: list):
 def vector_database(chunks: list):
     print(f"\nIniciando la creación de la base de datos con {len(chunks)} chunks...")
     embedding_function = OllamaEmbeddings(model=OLLAMA_EMBEDDING)
-    
-    # Definimos un tamaño de lote pequeño para no saturar Ollama
+
     batch_size = 50 
-    
-    # Inicializamos la base de datos con el primer lote
+
     db = Chroma.from_documents(
         documents=chunks[:batch_size],
         embedding=embedding_function,
         persist_directory=CHROMA_PATH
     )
-    
-    # Añadimos el resto de lotes con progreso visible
+
     for i in range(batch_size, len(chunks), batch_size):
         end = min(i + batch_size, len(chunks))
         db.add_documents(chunks[i:end])

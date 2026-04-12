@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from config import *
+from src.config import *
 from contextlib import asynccontextmanager
-from langchain_query import load_vectorstore, load_llm, build_rag_chain
+from src.langchain_query import load_vectorstore, load_llm, build_rag_chain
 
 
 class Query(BaseModel):

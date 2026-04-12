@@ -4,7 +4,6 @@ from src.query import rag_pipeline, get_collection, load_llm, build_bm25_index
 from sentence_transformers import SentenceTransformer
 from src.config import *
 from contextlib import asynccontextmanager
-import bm25s
 
 
 class Query(BaseModel):
