@@ -1,5 +1,4 @@
 [theme]
-base="light"
-backgroundColor="white"
-textColor="darkSeaGreen"
-borderColor="darkSeaGreen"
+base="dark"
+textColor="mediumSlateBlue"
+borderColor="mediumSlateBlue"
