@@ -1,4 +1,7 @@
 [theme]
 base="dark"
-textColor="mediumSlateBlue"
-borderColor="mediumSlateBlue"
+primaryColor="#7C3AED"
+backgroundColor="#0E1117"
+secondaryBackgroundColor="#1A1D24"
+textColor="#E5E7EB"
+borderColor="#2D2F36"

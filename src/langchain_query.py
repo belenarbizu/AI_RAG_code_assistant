@@ -6,7 +6,7 @@ from langchain_chroma import Chroma
 from langchain_classic.chains import create_retrieval_chain
 from langchain_classic.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
-from src.config import *
+from config import *
 
 
 def load_vectorstore():
@@ -18,16 +18,20 @@ def load_vectorstore():
 
 
 def load_llm():
-    return ChatOllama(model=OLLAMA_MODEL, temperature=0)
+    return ChatOllama(model=OLLAMA_MODEL, temperature=0, num_predict=250)
 
 
 def build_rag_chain(db, llm):
-    retriever = db.as_retriever(search_kwargs={"k": 4})
+    retriever = db.as_retriever(search_kwargs={"k": 3})
 
     prompt = ChatPromptTemplate.from_messages([
         ("system", """You are an assistant that answers questions about a code repository.
-        Answer using ONLY the provided context. Be concise, maximum 3 sentences.
-        Never suggest checking external sources. If unsure, say 'I don't know'.
+        Rules:
+        - Answer using ONLY the provided context.
+        - Be concise, maximum 3 sentences.
+        - Never suggest checking external sources.
+        - If unsure, say 'I don't know'.
+        - Answer using 250 words or less.
 
         Context: {context}"""),
         ("human", "{input}")

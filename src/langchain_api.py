@@ -3,9 +3,9 @@ load_dotenv()
 
 from fastapi import FastAPI
 from pydantic import BaseModel
-from src.config import *
+from config import *
 from contextlib import asynccontextmanager
-from src.langchain_query import load_vectorstore, load_llm, build_rag_chain
+from langchain_query import load_vectorstore, load_llm, build_rag_chain
 
 
 class Query(BaseModel):
@@ -26,5 +26,5 @@ app = FastAPI(lifespan=lifespan)
 
 @app.post("/ask")
 def ask_question(request: Query):
-    result = build_rag_chain(app.state.db, app.state.llm).invoke({"input": request.query})
+    result = app.state.chain.invoke({"input": request.query})
     return result
