@@ -9,9 +9,9 @@ langchain
 langchain-community
 unstructured
 langchain-text-splitters
-"unstructured[md]"
 langchain-huggingface
 langchain-chroma
 accelerate
 langchain_ollama
 python-magic-bin
+rank_bm25

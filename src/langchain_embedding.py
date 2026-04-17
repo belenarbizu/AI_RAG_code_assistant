@@ -1,8 +1,8 @@
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter, Language
 from langchain_chroma import Chroma
-from langchain_ollama import OllamaEmbeddings
-from src.config import *
+from langchain_huggingface import HuggingFaceEmbeddings
+from config import *
 
 
 def load_files(repo_path: str) -> list:
@@ -11,14 +11,16 @@ def load_files(repo_path: str) -> list:
         glob="**/*.md", 
         loader_cls=TextLoader, 
         show_progress=True, 
-        silent_errors=True
+        silent_errors=True,
+        exclude=["**/.buildkite/**", "**/.github/**", "**/cmake/**", "**/tests/**", "**/tools/**"]
     )
     py_loader = DirectoryLoader(
         repo_path, 
         glob="**/*.py", 
         loader_cls=TextLoader, 
         show_progress=True, 
-        silent_errors=True
+        silent_errors=True,
+        exclude=["**/.buildkite/**", "**/.github/**", "**/cmake/**", "**/tests/**", "**/tools/**"]
     )
     
     md_docs = []
@@ -37,6 +39,7 @@ def load_files(repo_path: str) -> list:
 
 def chunking_files(md_files: list, py_files: list):
     md_splitter = RecursiveCharacterTextSplitter(
+        separators=["\n\n", "\n", ".", " ", ""],
         chunk_size=1000,
         chunk_overlap=200
     )
@@ -55,7 +58,7 @@ def chunking_files(md_files: list, py_files: list):
 
 def vector_database(chunks: list):
     print(f"\nIniciando la creación de la base de datos con {len(chunks)} chunks...")
-    embedding_function = OllamaEmbeddings(model=OLLAMA_EMBEDDING)
+    embedding_function = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
 
     batch_size = 50 
 

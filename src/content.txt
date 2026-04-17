@@ -1,0 +1,317 @@
+Find the full list of supported models [here](https://docs.vllm.ai/en/latest/models/supported_models.html).
+
+## Getting Started
+
+Install vLLM with `pip` or [from source](https://docs.vllm.ai/en/latest/getting_started/installation/gpu/index.html#build-wheel-from-source):
+
+```bash
+pip install vllm
+```
+
+Visit our [documentation](https://docs.vllm.ai/en/latest/) to learn more.
+
+- [Installation](https://docs.vllm.ai/en/latest/getting_started/installation.html)
+- [Quickstart](https://docs.vllm.ai/en/latest/getting_started/quickstart.html)
+- [List of Supported Models](https://docs.vllm.ai/en/latest/models/supported_models.html)
+
+## Contributing
+
+We welcome and value any contributions and collaborations.
+Please check out [Contributing to vLLM](https://docs.vllm.ai/en/latest/contributing/index.html) for how to get involved.
+
+## Sponsors
+
+vLLM is a community project. Our compute resources for development and testing are supported by the following organizations. Thank you for your support!### Which quantization configs does vLLM CPU support?
+
+- vLLM CPU supports quantizations:
+    - AWQ (x86 only)
+    - GPTQ (x86 only)
+    - compressed-tensor INT8 W8A8 (x86, s390x)
+
+### (x86 only) What is the purpose of `VLLM_CPU_MOE_PREPACK` and `VLLM_CPU_SGL_KERNEL`?
+
+- Both of them requires `amx` CPU flag.
+    - `VLLM_CPU_MOE_PREPACK` can provides better performance for MoE models
+    - `VLLM_CPU_SGL_KERNEL` can provides better performance for MoE models and small-batch scenarios.# Registering a Model
+
+vLLM relies on a model registry to determine how to run each model.
+A list of pre-registered architectures can be found [here](../../models/supported_models.md).
+
+If your model is not on this list, you must register it to vLLM.
+This page provides detailed instructions on how to do so.
+
+## Built-in models
+
+To add a model directly to the vLLM library, start by forking our [GitHub repository](https://github.com/vllm-project/vllm) and then [build it from source][build-from-source].
+This gives you the ability to modify the codebase and test your model.
+
+After you have implemented your model (see [tutorial](basic.md)), put it into the <gh-dir:vllm/model_executor/models> directory.
+Then, add your model class to `_VLLM_MODELS` in <gh-file:vllm/model_executor/models/registry.py> so that it is automatically registered upon importing vLLM.
+Finally, update our [list of supported models](../../models/supported_models.md) to promote your model!# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+"""PyTorch Zamba2 model implementation for vLLM.
+
+This module implements the Zamba2 architecture from 
+https://arxiv.org/abs/2411.15242, which combines Mamba and Transformer 
+architectures in a hybrid model optimized for efficient sequence modeling. The 
+model alternates between state space model layers and attention-based layers.
+"""
+from collections.abc import Iterable
+from itertools import cycle
+from typing import Optional, Union
+
+import torch
+from torch import nn
+from transformers import Zamba2ConfigOriginally developed in the [Sky Computing Lab](https://sky.cs.berkeley.edu) at UC Berkeley, vLLM has evolved into a community-driven project with contributions from both academia and industry.
+
+Where to get started with vLLM depends on the type of user. If you are looking to:
+
+- Run open-source models on vLLM, we recommend starting with the [Quickstart Guide](./getting_started/quickstart.md)
+- Build applications with vLLM, we recommend starting with the [User Guide](./usage)
+- Build vLLM, we recommend starting with [Developer Guide](./contributing)
+
+For information about the development of vLLM, see:
+
+- [Roadmap](https://roadmap.vllm.ai)
+- [Releases](https://github.com/vllm-project/vllm/releases)
+
+vLLM is fast with:# Usage Stats Collection
+
+vLLM collects anonymous usage data by default to help the engineering team better understand which hardware and model configurations are widely used. This data allows them to prioritize their efforts on the most common workloads. The collected data is transparent, does not contain any sensitive information.
+
+A subset of the data, after cleaning and aggregation, will be publicly released for the community's benefit. For example, you can see the 2024 usage report [here](https://2024.vllm.ai).
+
+## What data is collected?
+
+The list of data collected by the latest version of vLLM can be found here: <gh-file:vllm/usage/usage_lib.py>
+
+Here is an example as of v0.4.0:
+
+??? console "Output"# Summary
+
+!!! important
+    Many decoder language models can now be automatically loaded using the [Transformers backend][transformers-backend] without having to implement them in vLLM. See if `vllm serve <model>` works first!
+
+vLLM models are specialized [PyTorch](https://pytorch.org/) models that take advantage of various [features](../../features/compatibility_matrix.md) to optimize their performance.
+
+The complexity of integrating a model into vLLM depends heavily on the model's architecture.
+The process is considerably straightforward if the model shares a similar architecture with an existing model in vLLM.
+However, this can be more complex for models that include new operators (e.g., a new attention mechanism).
+
+Read through these pages for a step-by-step guide:
+
+- [Basic Model](basic.md)
+- [Registering a Model](registration.md)
+- [Unit Testing](tests.md)
+- [Multi-Modal Support](multimodal.md)return architecture
+
+    def inspect_model_cls(
+        self,
+        architectures: Union[str, list[str]],
+        model_config: ModelConfig,
+    ) -> tuple[_ModelInfo, str]:
+        if isinstance(architectures, str):
+            architectures = [architectures]
+        if not architectures:
+            raise ValueError("No model architectures are specified")
+
+        # Require transformers impl
+        if model_config.model_impl == ModelImpl.TRANSFORMERS:
+            arch = self._try_resolve_transformers(architectures[0],
+                                                  model_config)
+            if arch is not None:
+                model_info = self._try_inspect_model_cls(arch)
+                if model_info is not None:
+                    return (model_info, arch)Originally developed in the [Sky Computing Lab](https://sky.cs.berkeley.edu) at UC Berkeley, vLLM has evolved into a community-driven project with contributions from both academia and industry.
+
+Where to get started with vLLM depends on the type of user. If you are looking to:
+
+- Run open-source models on vLLM, we recommend starting with the [Quickstart Guide](./getting_started/quickstart.md)
+- Build applications with vLLM, we recommend starting with the [User Guide](./usage)
+- Build vLLM, we recommend starting with [Developer Guide](./contributing)
+
+For information about the development of vLLM, see:
+
+- [Roadmap](https://roadmap.vllm.ai)
+- [Releases](https://github.com/vllm-project/vllm/releases)
+
+vLLM is fast with:# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+
+# Adapted from
+# https://github.com/sgl-project/sglang/blob/9f635ea50de920aa507f486daafba26a5b837574/python/sglang/srt/layers/attention/triton_ops/decode_attention.py
+# which was originally adapted from
+# https://github.com/ModelTC/lightllm/blob/96353e868a840db4d103138caf15ed9dbea8c186/lightllm/models/deepseek2/triton_kernel/gqa_flash_decoding_stage1.py
+# https://github.com/ModelTC/lightllm/blob/96353e868a840db4d103138caf15ed9dbea8c186/lightllm/models/deepseek2/triton_kernel/gqa_flash_decoding_stage2.py
+
+# Changes:
+# - Add support for page size >= 1.4. Subsequently, vLLM applies some historical patches to the config object. These are mostly related to RoPE configuration; see [here](https://github.com/vllm-project/vllm/blob/127c07480ecea15e4c2990820c457807ff78a057/vllm/transformers_utils/config.py#L244) for the implementation.# vLLM V1
+
+!!! announcement
+
+    We have started the process of deprecating V0. Please read [RFC #18571](gh-issue:18571) for more details.
+
+V1 is now enabled by default for all supported use cases, and we will gradually enable it for every use case we plan to support. Please share any feedback on [GitHub](https://github.com/vllm-project/vllm) or in the [vLLM Slack](https://inviter.co/vllm-slack).
+
+To disable V1, please set the environment variable as: `VLLM_USE_V1=0`, and send us a GitHub issue sharing the reason!
+
+## Why vLLM V1?
+
+vLLM V0 successfully supported a wide range of models and hardware, but as new features were developed independently, the system grew increasingly complex. This complexity made it harder to integrate new capabilities and introduced technical debt, revealing the need for a more streamlined and unified design.f"'{params.guided_decoding.backend}', but vLLM was "
+                    f"initialised with '{engine_level_backend}'. This error "
+                    "can be resolved by removing backend selection from the "
+                    "request.")
+        else:
+            params.guided_decoding.backend = engine_level_backend# Contributing to vLLM
+
+You may find information about contributing to vLLM on [docs.vllm.ai](https://docs.vllm.ai/en/latest/contributing).response = generator.run(
+      messages=[ChatMessage.from_user("Hi. Can you help me plan my next trip to Italy?")]
+    )
+
+    print("-"*30)
+    print(response)
+    print("-"*30)
+    ```
+
+```console
+------------------------------
+{'replies': [ChatMessage(_role=<ChatRole.ASSISTANT: 'assistant'>, _content=[TextContent(text=' Of course! Where in Italy would you like to go and what type of trip are you looking to plan?')], _name=None, _meta={'model': 'mistralai/Mistral-7B-Instruct-v0.1', 'index': 0, 'finish_reason': 'stop', 'usage': {'completion_tokens': 23, 'prompt_tokens': 21, 'total_tokens': 44, 'completion_tokens_details': None, 'prompt_tokens_details': None}})]}
+------------------------------
+```
+
+For details, see the tutorial [Using vLLM in Haystack](https://github.com/deepset-ai/haystack-integrations/blob/main/integrations/vllm.md).## Logging Configuration Environment Variables
+
+### `VLLM_CONFIGURE_LOGGING`
+
+`VLLM_CONFIGURE_LOGGING` controls whether or not vLLM takes any action to
+configure the loggers used by vLLM. This functionality is enabled by default,
+but can be disabled by setting `VLLM_CONFIGURE_LOGGING=0` when running vLLM.
+
+If `VLLM_CONFIGURE_LOGGING` is enabled and no value is given for
+`VLLM_LOGGING_CONFIG_PATH`, vLLM will use built-in default configuration to
+configure the root vLLM logger. By default, no other vLLM loggers are
+configured and, as such, all vLLM loggers defer to the root vLLM logger to make
+all logging decisions.
+
+If `VLLM_CONFIGURE_LOGGING` is disabled and a value is given for
+`VLLM_LOGGING_CONFIG_PATH`, an error will occur while starting vLLM.
+
+### `VLLM_LOGGING_CONFIG_PATH`from ...models.registry import HF_EXAMPLE_MODELS
+from ...utils import VLLM_PATH
+
+chatml_jinja_path = VLLM_PATH / "examples/template_chatml.jinja"
+assert chatml_jinja_path.exists()
+
+# Define models, templates, and their corresponding expected outputs
+MODEL_TEMPLATE_GENERATION_OUTPUT = [
+    ("facebook/opt-125m", chatml_jinja_path, True, False, """<|im_start|>user
+Hello<|im_end|>
+<|im_start|>assistant
+Hi there!<|im_end|>
+<|im_start|>user
+What is the capital of<|im_end|>
+<|im_start|>assistant
+"""),
+    ("facebook/opt-125m", chatml_jinja_path, False, False, """<|im_start|>user
+Hello<|im_end|>
+<|im_start|>assistant
+Hi there!<|im_end|>
+<|im_start|>user
+What is the capital of"""),
+    ("facebook/opt-125m", chatml_jinja_path, False, True, """<|im_start|>user
+Hello<|im_end|>
+<|im_start|>assistant
+Hi there!<|im_end|>
+<|im_start|>user
+What is the capital of<|im_end|>
+<|im_start|>assistant
+The capital of"""),
+]class SelfAttnBlockSpaceManager(BlockSpaceManager):
+    """BlockSpaceManager which manages the allocation of KV cache.
+
+    It owns responsibility for allocation, swapping, allocating memory for
+    autoregressively-generated tokens, and other advanced features such as
+    prefix caching, forking/copy-on-write, and sliding-window memory allocation.
+
+    This class implements the design described in
+    https://github.com/vllm-project/vllm/pull/3492.
+
+    Lookahead slots
+        The block manager has the notion of a "lookahead slot". These are slots
+        in the KV cache that are allocated for a sequence. Unlike the other
+        allocated slots, the content of these slots is undefined -- the worker
+        may use the memory allocations in any way.### Which quantization configs does vLLM CPU support?
+
+- vLLM CPU supports quantizations:
+    - AWQ (x86 only)
+    - GPTQ (x86 only)
+    - compressed-tensor INT8 W8A8 (x86, s390x)
+
+### (x86 only) What is the purpose of `VLLM_CPU_MOE_PREPACK` and `VLLM_CPU_SGL_KERNEL`?
+
+- Both of them requires `amx` CPU flag.
+    - `VLLM_CPU_MOE_PREPACK` can provides better performance for MoE models
+    - `VLLM_CPU_SGL_KERNEL` can provides better performance for MoE models and small-batch scenarios.# Logging configuration
+    # If set to 0, vllm will not configure logging
+    # If set to 1, vllm will configure logging using the default configuration
+    #    or the configuration file specified by VLLM_LOGGING_CONFIG_PATH
+    "VLLM_CONFIGURE_LOGGING":
+    lambda: int(os.getenv("VLLM_CONFIGURE_LOGGING", "1")),
+    "VLLM_LOGGING_CONFIG_PATH":
+    lambda: os.getenv("VLLM_LOGGING_CONFIG_PATH"),
+
+    # this is used for configuring the default logging level
+    "VLLM_LOGGING_LEVEL":
+    lambda: os.getenv("VLLM_LOGGING_LEVEL", "INFO").upper(),
+
+    # if set, VLLM_LOGGING_PREFIX will be prepended to all log messages
+    "VLLM_LOGGING_PREFIX":
+    lambda: os.getenv("VLLM_LOGGING_PREFIX", ""),class LoRANotSupportedWorkerBase(WorkerBase):
+    """Partial implementation of WorkerBase that raises exceptions when LoRA
+    methods are invoked.
+    """
+
+    def add_lora(self, lora_request: LoRARequest) -> bool:
+        raise ValueError(f"{type(self)} does not support LoRA")
+
+    def remove_lora(self, lora_id: int) -> bool:
+        raise ValueError(f"{type(self)} does not support LoRA")
+
+    def pin_lora(self, lora_id: int) -> bool:
+        raise ValueError(f"{type(self)} does not support LoRA")
+
+    def list_loras(self) -> Set[int]:
+        raise ValueError(f"{type(self)} does not support LoRA")
+
+
+@dataclasses.dataclass(frozen=True)def init_logger(name: str) -> _VllmLogger:
+    """The main purpose of this function is to ensure that loggers are
+    retrieved in such a way that we can be sure the root vllm logger has
+    already been configured."""
+
+    logger = logging.getLogger(name)
+
+    for method_name, method in _METHODS_TO_PATCH.items():
+        setattr(logger, method_name, MethodType(method, logger))
+
+    return cast(_VllmLogger, logger)
+
+
+# The root logger is initialized when the module is imported.
+# This is thread-safe as the module is only imported once,
+# guaranteed by the Python GIL.
+_configure_vllm_root_logger()
+
+logger = init_logger(__name__)# Usage Stats Collection
+
+vLLM collects anonymous usage data by default to help the engineering team better understand which hardware and model configurations are widely used. This data allows them to prioritize their efforts on the most common workloads. The collected data is transparent, does not contain any sensitive information.
+
+A subset of the data, after cleaning and aggregation, will be publicly released for the community's benefit. For example, you can see the 2024 usage report [here](https://2024.vllm.ai).
+
+## What data is collected?
+
+The list of data collected by the latest version of vLLM can be found here: <gh-file:vllm/usage/usage_lib.py>
+
+Here is an example as of v0.4.0:
+
+??? console "Output"
