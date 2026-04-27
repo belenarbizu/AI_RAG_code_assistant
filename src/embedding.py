@@ -10,6 +10,9 @@ def load_files(repo_path: str) -> list:
 
     # rglob checks files in subdirectories too
     for file in Path(repo_path).rglob('*'):
+        # Filter out tests, examples and other noise
+        if any(part in file.parts for part in ["tests", "examples", "assets", "benchmarks", ".github", ".buildkite"]):
+            continue
         if file.suffix == '.md' or file.suffix == '.py':
             files.append(file)
 

@@ -12,7 +12,7 @@ def load_files(repo_path: str) -> list:
         loader_cls=TextLoader, 
         show_progress=True, 
         silent_errors=True,
-        exclude=["**/.buildkite/**", "**/.github/**", "**/cmake/**", "**/tests/**", "**/tools/**"]
+        exclude=["**/.buildkite/**", "**/.github/**", "**/cmake/**", "**/tests/**", "**/tools/**", "**/examples/**", "**/assets/**", "**/benchmarks/**"]
     )
     py_loader = DirectoryLoader(
         repo_path, 
@@ -20,7 +20,7 @@ def load_files(repo_path: str) -> list:
         loader_cls=TextLoader, 
         show_progress=True, 
         silent_errors=True,
-        exclude=["**/.buildkite/**", "**/.github/**", "**/cmake/**", "**/tests/**", "**/tools/**"]
+        exclude=["**/.buildkite/**", "**/.github/**", "**/cmake/**", "**/tests/**", "**/tools/**", "**/examples/**", "**/assets/**", "**/benchmarks/**"]
     )
     
     md_docs = []

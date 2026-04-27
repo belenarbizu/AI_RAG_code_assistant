@@ -5,9 +5,10 @@ Built a RAG pipeline to answer questions about large codebases.
 
 | componente | herramienta           |
 | ---------- | --------------------- |
-| LLM        | Qwen                  |
 | Embeddings | sentence-transformers |
 | Vector DB  | ChromaDB              |
+| Retriever  | Hybrid search         |
+| LLM        | Qwen                  |
 | Dataset    | vLLM repository       |
 
 
@@ -15,9 +16,10 @@ Built a RAG pipeline to answer questions about large codebases.
 
 | componente | herramienta           |
 | ---------- | --------------------- |
-| LLM        | Ollama                |
-| Embeddings | sentence-transformers |
+| Embeddings | HuggingFaceEmbeddings |
 | Vector DB  | ChromaDB              |
+| Retriever  | Hybrid search         |
+| LLM        | Ollama                |
 | Dataset    | vLLM repository       |
 
 

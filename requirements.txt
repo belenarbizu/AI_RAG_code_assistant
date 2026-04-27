@@ -15,3 +15,6 @@ accelerate
 langchain_ollama
 python-magic-bin
 rank_bm25
+ragas
+langchain-mistralai
+mistralai==1.2.5
